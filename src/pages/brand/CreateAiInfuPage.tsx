@@ -8,7 +8,7 @@ const CreateAiInfuPage: React.FC = () => {
   const handleSend = () => {
     // Here you would call your API to create an image
     // For demo purposes, we just show a placeholder
-    setImage("/public/assets/onalps_ai_infu_normal.jpeg");
+    setImage("/assets/onalps_ai_infu_normal.jpeg");
   };
 
   const handleConfirm = () => {

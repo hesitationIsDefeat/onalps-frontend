@@ -4,13 +4,13 @@ const ChoosePage: React.FC = () => {
   const cards = [
     {
       id: 1,
-      image: "/public/assets/onalps_ai_infu_normal.jpeg", // replace with your image URL
+      image: "/assets/onalps_ai_infu_normal.jpeg", // replace with your image URL
       text: "Create Ai Influencer",
       link: "/brand/create/ai",
     },
     {
       id: 2,
-      image: "/public/assets/onalps_ai_infu_normal.jpeg", // replace with your image URL
+      image: "/assets/onalps_ai_infu_normal.jpeg", // replace with your image URL
       text: "Create Post",
       link: "/brand/create/post",
     },
