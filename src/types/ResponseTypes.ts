@@ -54,6 +54,10 @@ export type UpdateAiInfuPromptResponse = {
     isSuccess: boolean;
 }
 
+export type FinishAiInfuResponse = {
+    isSuccess: boolean;
+}
+
 export type ValidateBrandResponse = {
     isValid: boolean;
 }

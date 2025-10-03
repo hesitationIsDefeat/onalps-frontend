@@ -18,6 +18,12 @@ const ChoosePage: React.FC = () => {
     },
     {
       id: 2,
+      image: "/assets/onalps_ai_infu_edit.jpg", 
+      text: "Edit Ai Influencer",
+      link: `/brand/ai/marketplace/${marketplaceId}/brand/${brandId}`,
+    },
+    {
+      id: 3,
       image: "/assets/onalps_ai_infu_product.jpeg", 
       text: "Create Post",
       link: `/brand/create/post/marketplace/${marketplaceId}/brand/${brandId}`,

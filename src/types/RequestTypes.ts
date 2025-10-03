@@ -28,6 +28,10 @@ export type UpdateAiInfuPromptRequest = {
     prompt: string;
 }
 
+export type FinishAiInfuRequest = {
+    aiInfuId: string;
+}
+
 export type ValidateBrandRequest = {
     marketplaceId: string;
     brandId: string;

@@ -86,6 +86,7 @@ const AdminPage: React.FC = () => {
   async function handleAiInfuImageUpload() {
     if (!marketplaceId || !brandId || !aiInfuId || !aiInfu) return;
     const file = fileInputRef.current?.files?.[0];
+    console.log(file);
     if (!file) return;
     const imageExt = file.type.split("/").pop();
     if (!imageExt) return;

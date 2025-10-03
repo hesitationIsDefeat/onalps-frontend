@@ -5,6 +5,8 @@ import type { AiInfu } from "../../types/ResponseTypes";
 import useFirebase from "../../hooks/useFirebase";
 import { LoadingIndicator } from "../../components/LoadingIndicator";
 import { LoadingType } from "../../enums/Loading";
+import { StatusModal, type StatusModalProps } from "../../components/StatusModal";
+import { ModalState } from "../../enums/ModalState";
 
 const CreatePostPage: React.FC = () => {
   const [middleImage, setMiddleImage] = useState<string | null>(null);
@@ -18,6 +20,8 @@ const CreatePostPage: React.FC = () => {
   const [selectedPostImage, setSelectedPostImage] = useState<string | null>(null);
   const [selectedPostImageIndex, setSelectedPostImageIndex] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalProps, setModalProps] = useState<StatusModalProps>({type: ModalState.SUCCESS});
 
   const {marketplaceId, brandId} = useParams<{marketplaceId: string; brandId: string}>();
 
@@ -25,6 +29,15 @@ const CreatePostPage: React.FC = () => {
 
   const { fetchValidateBrand, fetchGetBrandAiInfus, fetchGetProductImagePath, fetchPostPostImages, fetchPostPost } = useBrandApiCalls();
   const {handleContentUpload} = useFirebase()
+
+
+    function handleModalClose() {
+      setIsModalOpen(false);
+    }
+  
+    function updateModalProps(state: ModalState, message?: string, url?: string, seconds?: number, onClose?: () => void) {
+      setModalProps({ type: state, message, url, seconds, onClose });
+    }
 
   const handleMiddleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[e.target.files.length -1]) {
@@ -105,8 +118,11 @@ const CreatePostPage: React.FC = () => {
     if (!marketplaceId || !brandId || !selectedAiInfu || !productImageUrl || !selectedPostImage) return;
     const response = await fetchPostPost(marketplaceId, brandId, { aiInfuId: selectedAiInfu.id, postImageUrl: selectedPostImage, productImageUrl, prompt });
     if (response.response && response.response.isSuccess) {
-      alert("Post saved successfully!");
+      updateModalProps(ModalState.SUCCESS, `Prompt updated successfully.`, undefined, undefined, handleModalClose);
+    } else {
+      updateModalProps(ModalState.ERROR, `Failed to update prompt.`, undefined, undefined, handleModalClose);
     }
+    setIsModalOpen(true);
   }
 
   async function init() {
@@ -133,6 +149,8 @@ const CreatePostPage: React.FC = () => {
   }
 
   return (
+    <>
+        {isModalOpen && <StatusModal {...modalProps} />}
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="flex gap-8 w-[70rem]">
         {/* Left Column */}
@@ -184,7 +202,7 @@ const CreatePostPage: React.FC = () => {
                   className="w-full h-full object-cover rounded"
                 />
               ) : (
-                <span className="text-gray-500">Upload</span>
+                <span className="text-gray-500">Upload product</span>
               )}
             </label>
             <input
@@ -199,7 +217,9 @@ const CreatePostPage: React.FC = () => {
             {/* Create Button */}
             <button
               onClick={handleCreate}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              disabled={!selectedAiInfu || !prompt || !middleImage || isCreating}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700
+              disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed "
             >
               Create
             </button>
@@ -235,6 +255,7 @@ const CreatePostPage: React.FC = () => {
        
       </div>
     </div>
+    </>
   );
 };
 

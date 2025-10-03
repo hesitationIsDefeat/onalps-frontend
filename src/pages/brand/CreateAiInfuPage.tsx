@@ -2,6 +2,8 @@ import React, { useEffect, useState, type ChangeEvent } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import useBrandApiCalls from "../../hooks/api/useBrandApiCalls";
 import type { AiInfuBlueprint } from "../../types/ResponseTypes";
+import { StatusModal, type StatusModalProps } from "../../components/StatusModal";
+import { ModalState } from "../../enums/ModalState";
 
 const CreateAiInfuPage: React.FC = () => {
   const [name, setName] = useState("");
@@ -11,30 +13,65 @@ const CreateAiInfuPage: React.FC = () => {
   const [isValid, setIsValid] = React.useState<boolean | null>(null);
   const [searchParams] = useSearchParams();
   const aiInfuId = searchParams.get("aiInfuId");
+  const [isSending, setIsSending] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalProps, setModalProps] = useState<StatusModalProps>({type: ModalState.SUCCESS});
 
   const {marketplaceId, brandId} = useParams<{marketplaceId: string; brandId: string}>();
 
-  const { fetchValidateBrand, fetchPostAiInfu, fetchUpdateAiInfuPrompt} = useBrandApiCalls();
+  const { fetchValidateBrand, fetchPostAiInfu, fetchUpdateAiInfuPrompt, fetchFinishAiInfu} = useBrandApiCalls();
+
+  function handleModalClose() {
+    setIsModalOpen(false);
+  }
+
+  function updateModalProps(state: ModalState, message?: string, url?: string, seconds?: number, onClose?: () => void) {
+    setModalProps({ type: state, message, url, seconds, onClose });
+  }
 
   async function handleSend () {
     if (!marketplaceId || !brandId) return;
     if (!name || !prompt) return;
     if (aiInfuId) {
       if (prompt === oldPrompt) return;
+      setIsSending(true);
       const response = await fetchUpdateAiInfuPrompt(marketplaceId, brandId, {aiInfuId, prompt});
       if (response && response.response) {
-        alert(`AI Influencer prompt updated for ID: ${aiInfuId}`);
+        updateModalProps(ModalState.SUCCESS, `Prompt updated successfully.`, undefined, undefined, handleModalClose);
+
+      } else {
+        updateModalProps(ModalState.ERROR, `Failed to update prompt.`, undefined, undefined, handleModalClose);
       }
+      setIsModalOpen(true);
     } else {
+      setIsSending(true)
       const response = await fetchPostAiInfu(marketplaceId, brandId, { infuName: name, prompt });
       if (response && response.response) {
-        alert(`AI Influencer created with ID: ${response.response.infuId}`);
+        updateModalProps(ModalState.SUCCESS, `Ai Influencer created successfully.`, `/brand/ai/marketplace/${marketplaceId}/brand/${brandId}`, 3);
+      } else {
+        updateModalProps(ModalState.ERROR, `Failed to create Ai Influencer.`, undefined, undefined, handleModalClose);
       }
+      setIsModalOpen(true);
     }
+    setIsSending(false);
   };
 
   const handleConfirm = () => {
-    alert("Image confirmed!");
+    if (!marketplaceId || !brandId) return;
+    console.log(aiInfuId);
+    if (!aiInfuId) return;  
+    setIsConfirming(true);
+    fetchFinishAiInfu(marketplaceId, brandId, { aiInfuId }).then(response => {
+      if (response && response.response && response.response.isSuccess) {
+        updateModalProps(ModalState.SUCCESS, `AI Influencer has been finalized.`, `/brand/ai/marketplace/${marketplaceId}/brand/${brandId}`, 3);
+        setIsModalOpen(true);
+      } else {
+        updateModalProps(ModalState.ERROR, `Failed to finalize AI Influencer.`, undefined, undefined, handleModalClose);
+        setIsModalOpen(true);
+      }
+      setIsConfirming(false);
+    });
   };
 
     async function init() {
@@ -79,6 +116,9 @@ const CreateAiInfuPage: React.FC = () => {
     }
 
 return (
+  <>
+    {isModalOpen && <StatusModal {...modalProps} />}
+  
   <div className="min-h-screen flex items-center justify-center bg-gray-100">
     {/* Main container now row-based */}
     <div className="w-[60rem] flex flex-row gap-16">
@@ -135,13 +175,16 @@ return (
         {/* Confirm button */}
         <button
           onClick={handleConfirm}
-          className="w-[8rem] h-[3rem] bg-green-600 text-white rounded-lg shadow hover:bg-green-700"
+          disabled={!aiInfuId}
+          className="w-[8rem] h-[3rem] bg-green-600 text-white rounded-lg shadow hover:bg-green-700
+          disabled:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed "
         >
           Confirm
         </button>
       </div>
     </div>
   </div>
+  </>
 );
 
 };

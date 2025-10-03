@@ -1,6 +1,5 @@
-import type { Update } from "vite/types/hmrPayload.js";
-import type { GetProductImagePathRequest, PostAiInfuRequest, PostPostImagesRequest, PostPostRequest, UpdateAiInfuPromptRequest } from "../../types/RequestTypes";
-import type { GetBrandAiInfuBlueprintsResponse, GetBrandAiInfusResponse, GetProductImagePathResponse, PostAiInfuResponse, PostPostImagesResponse, PostPostResponse, UpdateAiInfuPromptResponse, ValidateBrandResponse } from "../../types/ResponseTypes";
+import type { FinishAiInfuRequest, GetProductImagePathRequest, PostAiInfuRequest, PostPostImagesRequest, PostPostRequest, UpdateAiInfuPromptRequest } from "../../types/RequestTypes";
+import type { FinishAiInfuResponse, GetBrandAiInfuBlueprintsResponse, GetBrandAiInfusResponse, GetProductImagePathResponse, PostAiInfuResponse, PostPostImagesResponse, PostPostResponse, UpdateAiInfuPromptResponse, ValidateBrandResponse } from "../../types/ResponseTypes";
 import type { ApiResponse } from "../../types/ResponseWrapperTypes";
 import useApiResponseHandling from "../useApiResponseHandling";
 import useAxios from "../useAxios";
@@ -47,6 +46,24 @@ export default function useBrandApiCalls() {
     async function fetchUpdateAiInfuPrompt(marketplaceId: string, brandId: string, body: UpdateAiInfuPromptRequest): Promise<ApiResponse<UpdateAiInfuPromptResponse>> {
         try {
             const response = await axiosInstance.post<UpdateAiInfuPromptResponse>(`${import.meta.env.VITE_API_MARKETPLACE_CONTROLLER}${import.meta.env.VITE_API_MARKETPLACE_CONTROLLER_UPDATE_AI_INFU_PROMPT_ENDPOINT}`,
+                body,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Marketplace-Id': marketplaceId,
+                        'X-Brand-Id': brandId,
+                        'X-Marketplace-Secret': import.meta.env.VITE_API_MARKETPLACE_SECRET_KEY
+                    }
+                });
+            return getSuccessApiResponse(response.data);
+        } catch (e) {
+            return getErrorApiResponse(e);
+        }
+    }
+
+    async function fetchFinishAiInfu(marketplaceId: string, brandId: string, body: FinishAiInfuRequest): Promise<ApiResponse<FinishAiInfuResponse>> {
+        try {
+            const response = await axiosInstance.post<FinishAiInfuResponse>(`${import.meta.env.VITE_API_MARKETPLACE_CONTROLLER}${import.meta.env.VITE_API_MARKETPLACE_CONTROLLER_FINISH_AI_INFU_ENDPOINT}`,
                 body,
                 {
                     headers: {
@@ -155,6 +172,7 @@ export default function useBrandApiCalls() {
         fetchGetProductImagePath,
         fetchPostPostImages,
         fetchPostPost,
-        fetchUpdateAiInfuPrompt
+        fetchUpdateAiInfuPrompt,
+        fetchFinishAiInfu
     };
 }
